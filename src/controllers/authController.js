@@ -18,8 +18,8 @@ class AuthController {
       message: 'Usuario registrado exitosamente',
       data: {
         user: result.user,
-        access_token: result.session?.access_token,
-        refresh_token: result.session?.refresh_token
+        access_token: result.token,
+        refresh_token: result.token // Por ahora usamos el mismo token para ambos
       }
     });
   });
@@ -35,8 +35,8 @@ class AuthController {
       message: 'Inicio de sesión exitoso',
       data: {
         user: result.user,
-        access_token: result.session.access_token,
-        refresh_token: result.session.refresh_token
+        access_token: result.token,
+        refresh_token: result.token // Por ahora usamos el mismo token para ambos
       }
     });
   });

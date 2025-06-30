@@ -12,6 +12,9 @@ const transactionRoutes = require('./routes/transactions');
 const categoryRoutes = require('./routes/categories');
 const budgetRoutes = require('./routes/budgets');
 const userRoutes = require('./routes/users');
+const debugRoutes = require('./routes/debug'); // Ruta temporal para debug
+const debugConstraintsRoutes = require('./routes/debug-constraints'); // Ruta para debug de restricciones
+const testRoutes = require('./routes/test'); // Ruta para test de login
 
 // Importar middlewares
 const { errorHandler } = require('./middleware/errorHandler');
@@ -21,7 +24,7 @@ const PORT = process.env.PORT || 3001;
 
 // Configuración de CORS
 const corsOptions = {
-  origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000'],
+  origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000', 'http://localhost:3001'],
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -66,6 +69,9 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api', debugRoutes); // Rutas de debug temporal
+app.use('/api', debugConstraintsRoutes); // Rutas de debug de restricciones
+app.use('/api/test', testRoutes); // Rutas de test
 
 // Ruta raíz
 app.get('/', (req, res) => {

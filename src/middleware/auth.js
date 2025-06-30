@@ -1,4 +1,5 @@
-const { supabase } = require('../config/supabase');
+const jwt = require('jsonwebtoken');
+const { query } = require('../config/database');
 
 // Middleware para verificar autenticación
 const authenticateUser = async (req, res, next) => {
@@ -14,37 +15,44 @@ const authenticateUser = async (req, res, next) => {
 
     const token = authHeader.substring(7); // Remover 'Bearer '
     
-    // Verificar el token con Supabase
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+    // Verificar el token JWT
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    if (error || !user) {
+    // Obtener información del usuario desde la base de datos
+    const getUserQuery = `
+      SELECT id, username, email, display_name, created_at, updated_at
+      FROM users WHERE id = $1
+    `;
+    const userResult = await query(getUserQuery, [decoded.userId]);
+    
+    if (userResult.rows.length === 0) {
       return res.status(401).json({
-        error: 'Token inválido',
-        message: 'El token proporcionado no es válido o ha expirado'
+        error: 'Usuario no encontrado',
+        message: 'El usuario asociado al token no existe'
       });
     }
 
-    // Obtener información adicional del usuario desde la tabla users
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-
-    if (userError && userError.code !== 'PGRST116') { // PGRST116 = no rows returned
-      console.error('Error obteniendo datos del usuario:', userError);
-    }
-
     // Agregar información del usuario al request
-    req.user = {
-      id: user.id,
-      email: user.email,
-      ...userData
-    };
+    req.user = userResult.rows[0];
 
     next();
   } catch (error) {
     console.error('Error en autenticación:', error);
+    
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({
+        error: 'Token inválido',
+        message: 'El token proporcionado no es válido'
+      });
+    }
+    
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        error: 'Token expirado',
+        message: 'El token ha expirado, por favor inicia sesión nuevamente'
+      });
+    }
+    
     res.status(500).json({
       error: 'Error interno del servidor',
       message: 'Error al verificar la autenticación'
@@ -63,26 +71,16 @@ const optionalAuth = async (req, res, next) => {
     }
 
     const token = authHeader.substring(7);
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    if (error || !user) {
-      req.user = null;
-      return next();
-    }
+    // Obtener información del usuario
+    const getUserQuery = `
+      SELECT id, username, email, display_name, created_at, updated_at
+      FROM users WHERE id = $1
+    `;
+    const userResult = await query(getUserQuery, [decoded.userId]);
 
-    // Obtener información adicional del usuario
-    const { data: userData } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-
-    req.user = {
-      id: user.id,
-      email: user.email,
-      ...userData
-    };
-
+    req.user = userResult.rows.length > 0 ? userResult.rows[0] : null;
     next();
   } catch (error) {
     console.error('Error en autenticación opcional:', error);
