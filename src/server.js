@@ -15,6 +15,7 @@ const userRoutes = require('./routes/users');
 const debugRoutes = require('./routes/debug'); // Ruta temporal para debug
 const debugConstraintsRoutes = require('./routes/debug-constraints'); // Ruta para debug de restricciones
 const testRoutes = require('./routes/test'); // Ruta para test de login
+const debugProductionRoutes = require('./routes/debug-production'); // Debug para producción
 
 // Importar middlewares
 const { errorHandler } = require('./middleware/errorHandler');
@@ -72,6 +73,7 @@ app.use('/api/users', userRoutes);
 app.use('/api', debugRoutes); // Rutas de debug temporal
 app.use('/api', debugConstraintsRoutes); // Rutas de debug de restricciones
 app.use('/api/test', testRoutes); // Rutas de test
+app.use('/api/debug', debugProductionRoutes); // Rutas de debug para producción
 
 // Ruta raíz
 app.get('/', (req, res) => {
