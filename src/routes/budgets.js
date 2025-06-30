@@ -1,6 +1,6 @@
 const express = require('express');
 const BudgetController = require('../controllers/budgetController');
-const { authenticateUser } = require('../middleware/auth');
+const { authenticateUser } = require('../middleware/auth-supabase');
 const { validate, budgetSchemas } = require('../middleware/validation');
 
 const router = express.Router();

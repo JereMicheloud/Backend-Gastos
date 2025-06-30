@@ -1,6 +1,6 @@
 const express = require('express');
 const CategoryController = require('../controllers/categoryController');
-const { authenticateUser } = require('../middleware/auth');
+const { authenticateUser } = require('../middleware/auth-supabase');
 const { validate, categorySchemas } = require('../middleware/validation');
 
 const router = express.Router();
