@@ -38,10 +38,10 @@ async function runTests() {
   
   // 3. Test registro (con datos de prueba)
   const testUser = {
-    email: 'test@example.com',
-    password: 'password123',
-    username: 'testuser',
-    display_name: 'Test User'
+    email: 'jeremy.production@gmail.com',
+    password: 'password123456',
+    username: 'jeremyprod',
+    display_name: 'Jeremy Production'
   };
   
   await apiRequest('/api/auth/register', {

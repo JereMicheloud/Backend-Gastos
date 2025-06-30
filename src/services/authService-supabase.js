@@ -12,7 +12,8 @@ class AuthService {
         options: {
           data: {
             username,
-            display_name
+            display_name,
+            full_name: display_name
           }
         }
       });
@@ -22,23 +23,8 @@ class AuthService {
         throw createError(400, error.message);
       }
 
-      // Crear registro en la tabla users
-      if (data.user) {
-        const { error: userError } = await supabase
-          .from('users')
-          .insert([{
-            id: data.user.id,
-            username,
-            email,
-            display_name,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }]);
-
-        if (userError) {
-          console.error('Error al crear perfil de usuario:', userError);
-          // No lanzamos error aquí porque el usuario ya fue creado en Auth
-        }
+      if (!data.user) {
+        throw createError(400, 'Error al crear usuario');
       }
 
       return {

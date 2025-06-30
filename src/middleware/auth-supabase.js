@@ -25,22 +25,24 @@ const authenticateUser = async (req, res, next) => {
     }
 
     // Obtener información adicional del usuario desde la tabla users
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-
-    if (userError && userError.code !== 'PGRST116') { // PGRST116 = no rows returned
-      console.error('Error obteniendo datos del usuario:', userError);
+    let userData = null;
+    try {
+      const { data: userDataResult } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      userData = userDataResult;
+    } catch (userError) {
+      console.log('Info: No se pudo obtener datos adicionales del usuario (tabla users)');
     }
 
     // Agregar información del usuario al request
     req.user = {
       id: user.id,
       email: user.email,
-      username: userData?.username || '',
-      display_name: userData?.display_name || '',
+      username: userData?.username || user.user_metadata?.username || '',
+      display_name: userData?.display_name || user.user_metadata?.display_name || user.user_metadata?.full_name || '',
       email_confirmed: user.email_confirmed_at ? true : false,
       ...userData
     };
